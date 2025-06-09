@@ -27,7 +27,7 @@ jobs:
       - name: Pull latest code into project directory
         run: |
           echo "Navigating to project directory and pulling latest code..."
-          cd /home/vagrant/another-homework-SET-2025/Basic_API # <--- THAY THẾ BẰNG ĐƯỜNG DẪN ĐÚNG CỦA BẠN
+          cd /home/vagrant/SET-2025/NodeJS_UDT # <--- THAY THẾ BẰNG ĐƯỜNG DẪN ĐÚNG CỦA BẠN
           git pull origin main # Đảm bảo 'origin main' là đúng remote và nhánh bạn muốn pull
           echo "✅ Code pulled successfully!"
 
@@ -35,7 +35,7 @@ jobs:
       - name: Install/Update Node.js dependencies
         run: |
           echo "Installing/updating dependencies..."
-          cd /home/vagrant/another-homework-SET-2025/Basic_API # <--- THAY THẾ BẰNG ĐƯỜNG DẪN ĐÚNG CỦA BẠN
+          cd /home/vagrant/SET-2025/NodeJS_UDT # <--- THAY THẾ BẰNG ĐƯỜNG DẪN ĐÚNG CỦA BẠN
           # Đảm bảo môi trường Node.js (ví dụ fnm) được thiết lập đúng nếu cần
           # Ví dụ nếu fnm không tự load trong môi trường non-interactive script:
           # export PATH="/home/vagrant/.local/share/fnm:$PATH" # Đường dẫn fnm của bạn
@@ -49,20 +49,20 @@ jobs:
         run: |
           echo "Attempting to restart Node.js application..."
           # Đây là phần phức tạp hơn và phụ thuộc vào cách bạn đang chạy ứng dụng.
-          # Nếu bạn chạy trực tiếp bằng 'node Basic_2.mjs', bạn cần dừng tiến trình cũ và bắt đầu tiến trình mới.
+          # Nếu bạn chạy trực tiếp bằng 'node app.js', bạn cần dừng tiến trình cũ và bắt đầu tiến trình mới.
           # SỬ DỤNG PROCESS MANAGER NHƯ PM2 SẼ GIÚP VIỆC NÀY DỄ DÀNG HƠN RẤT NHIỀU.
 
           # Ví dụ đơn giản (có thể cần cải thiện và kiểm tra quyền):
-          # Cố gắng tìm và dừng tiến trình Node.js đang chạy file Basic_2.mjs
+          # Cố gắng tìm và dừng tiến trình Node.js đang chạy file app.js
           # LƯU Ý: 'pkill -f' có thể nguy hiểm nếu pattern quá chung chung.
           echo "Stopping old process if any..."
-          pkill -f "node Basic_2.mjs" || echo "No old process found or failed to kill."
+          pkill -f "node app.js" || echo "No old process found or failed to kill."
           sleep 2 # Chờ một chút để port được giải phóng
 
           echo "Starting new process..."
-          cd /home/vagrant/another-homework-SET-2025/Basic_API # <--- THAY THẾ BẰNG ĐƯỜNG DẪN ĐÚNG CỦA BẠN
+          cd /home/vagrant/SET-2025/NodeJS_UDT # <--- THAY THẾ BẰNG ĐƯỜNG DẪN ĐÚNG CỦA BẠN
           # Chạy lại ứng dụng ở chế độ nền (background) và ghi log
           # Đảm bảo user 'vagrant' có quyền ghi vào app.log ở thư mục đó.
-          nohup node Basic_2.mjs > app.log 2>&1 &
+          nohup node app.js > app.log 2>&1 &
           echo "✅ Application restart initiated. Check app.log for details."
-          # Để kiểm tra: ps aux | grep Basic_2.mjs
+          # Để kiểm tra: ps aux | grep app.js
