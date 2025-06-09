@@ -140,5 +140,5 @@ server.listen(port, () => {
     console.log(`Máy chủ đang chạy tại http://localhost:${port}`);
 });
 
-console.log("Dyu Mai & VH la gay");
+console.log("Dyu Mai & VH yeu nhau");
 
