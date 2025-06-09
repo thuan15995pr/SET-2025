@@ -1,0 +1,68 @@
+name: Deploy to VM # Tên của workflow, sẽ hiển thị trên tab Actions của GitHub
+
+on:
+  push: # Sự kiện kích hoạt workflow
+    branches:
+      - main # Chỉ chạy khi có push lên nhánh 'main'. Bạn có thể đổi thành nhánh khác.
+
+jobs:
+  deploy:
+    name: Deploy Code to VM
+    # Quan trọng: Chỉ định job này chạy trên self-hosted runner của bạn.
+    # Runner của bạn có các label: 'self-hosted', 'Linux', 'ARM64' (như thấy trong hình của bạn)
+    # Bạn có thể dùng một hoặc nhiều label. 'self-hosted' thường là đủ.
+    runs-on: self-hosted # Hoặc chỉ 'self-hosted'
+
+    steps:
+      - name: Print Starting Message
+        run: echo "🚀 Starting deployment process on VM via GitHub Actions..."
+
+      # Bước 1: Checkout code (tùy chọn, nhưng tốt để có context của commit)
+      # Action này sẽ checkout code của repository vào thư mục làm việc tạm thời của runner.
+      # Nó không trực tiếp pull vào thư mục dự án của bạn ngay.
+      - name: Checkout repository
+        uses: actions/checkout@v4 # Luôn kiểm tra phiên bản mới nhất của action này
+
+      # Bước 2: Pull code mới nhất vào thư mục dự án thực tế trên VM
+      - name: Pull latest code into project directory
+        run: |
+          echo "Navigating to project directory and pulling latest code..."
+          cd /home/vagrant/another-homework-SET-2025/Basic_API # <--- THAY THẾ BẰNG ĐƯỜNG DẪN ĐÚNG CỦA BẠN
+          git pull origin main # Đảm bảo 'origin main' là đúng remote và nhánh bạn muốn pull
+          echo "✅ Code pulled successfully!"
+
+      # Bước 3: (Tùy chọn) Cài đặt/Cập nhật dependencies
+      - name: Install/Update Node.js dependencies
+        run: |
+          echo "Installing/updating dependencies..."
+          cd /home/vagrant/another-homework-SET-2025/Basic_API # <--- THAY THẾ BẰNG ĐƯỜNG DẪN ĐÚNG CỦA BẠN
+          # Đảm bảo môi trường Node.js (ví dụ fnm) được thiết lập đúng nếu cần
+          # Ví dụ nếu fnm không tự load trong môi trường non-interactive script:
+          # export PATH="/home/vagrant/.local/share/fnm:$PATH" # Đường dẫn fnm của bạn
+          # eval "`fnm env`"
+          # fnm use # Hoặc phiên bản Node cụ thể
+          npm install --production # Chỉ cài các dependencies cho production
+          echo "✅ Dependencies installed/updated!"
+
+      # Bước 4: (Tùy chọn) Khởi động lại ứng dụng Node.js của bạn
+      - name: Restart Node.js Application
+        run: |
+          echo "Attempting to restart Node.js application..."
+          # Đây là phần phức tạp hơn và phụ thuộc vào cách bạn đang chạy ứng dụng.
+          # Nếu bạn chạy trực tiếp bằng 'node Basic_2.mjs', bạn cần dừng tiến trình cũ và bắt đầu tiến trình mới.
+          # SỬ DỤNG PROCESS MANAGER NHƯ PM2 SẼ GIÚP VIỆC NÀY DỄ DÀNG HƠN RẤT NHIỀU.
+
+          # Ví dụ đơn giản (có thể cần cải thiện và kiểm tra quyền):
+          # Cố gắng tìm và dừng tiến trình Node.js đang chạy file Basic_2.mjs
+          # LƯU Ý: 'pkill -f' có thể nguy hiểm nếu pattern quá chung chung.
+          echo "Stopping old process if any..."
+          pkill -f "node Basic_2.mjs" || echo "No old process found or failed to kill."
+          sleep 2 # Chờ một chút để port được giải phóng
+
+          echo "Starting new process..."
+          cd /home/vagrant/another-homework-SET-2025/Basic_API # <--- THAY THẾ BẰNG ĐƯỜNG DẪN ĐÚNG CỦA BẠN
+          # Chạy lại ứng dụng ở chế độ nền (background) và ghi log
+          # Đảm bảo user 'vagrant' có quyền ghi vào app.log ở thư mục đó.
+          nohup node Basic_2.mjs > app.log 2>&1 &
+          echo "✅ Application restart initiated. Check app.log for details."
+          # Để kiểm tra: ps aux | grep Basic_2.mjs
